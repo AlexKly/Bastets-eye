@@ -16,3 +16,49 @@ While `YoloDatasetCreator` was initialized it needs to execute method `create_df
 Here is specified two common parameters: 
 - **n_transforms** - number of the augmented images that will be generated
 - **test_size** - ratio of the test size from all dataset
+
+*If you want to use own or different dataset you need to rework preprocessing part for exctracting bounded boxes and 
+images.*
+
+As result, you need to get following data structure and info dataset **yaml** file:
+
+**Dataset files structure:**
+```
+bastets_eye_ds
+├── train
+│   ├── images
+│   │   ├── train_image_0.png
+│   │   ...
+│   │   └── train_image_n.png
+│   └── labels
+│       ├── train_image_0.txt
+│       ...
+│       └── train_image_n.txt
+│
+├── test
+│   ├── images
+│   │   ├── test_image_0.png
+│   │   ...
+│   │   └── test_image_n.png
+│   └── labels
+│       ├── test_image_0.txt
+│       ...
+│       └── test_image_n.txt
+│
+└── bastets_eye_ds.yaml
+```
+
+**Example for .yaml file:**
+```yaml
+path: .../bastets_eye_ds  # dataset root dir
+train: .../images/train  # train images (relative to 'path')
+val: ...images/test  # val images (relative to 'path')
+test: ...images/test  # test images (optional)
+
+# Classes (only one class - cat)
+names:
+  0: cat
+```
+
+For more details how to train YOLO using custom dataset you can check 
+[here](https://github.com/ultralytics/yolov5/wiki/Train-Custom-Data?ysclid=lelixivhgj19680677).

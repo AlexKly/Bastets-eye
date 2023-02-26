@@ -74,11 +74,11 @@ class YoloDatasetCreator:
 
     def form_yolo_ds(self, samples, test_size):
         # Init Yolo dataset files and directories:
-        dir_train, dir_test = self.dir_yolo_ds/'train', self.dir_yolo_ds/'test'
-        dir_train_imgs, dir_train_lbls = dir_train/'images', dir_train/'labels'
-        dir_test_imgs, dir_test_lbls = dir_test/'images', dir_test/'labels'
+        dir_imgs, dir_lbls = self.dir_yolo_ds/'images', self.dir_yolo_ds/'labels'
+        dir_train_imgs, dir_train_lbls = dir_imgs/'train', dir_lbls/'train'
+        dir_test_imgs, dir_test_lbls = dir_imgs/'test', dir_lbls/'test'
         path_ds_info = self.dir_yolo_ds/f'{self.dir_yolo_ds.parts[-1]}.yaml'
-        dirs = [dir_train, dir_test, dir_train_imgs, dir_train_lbls, dir_test_imgs, dir_test_lbls]
+        dirs = [dir_imgs, dir_lbls, dir_train_imgs, dir_train_lbls, dir_test_imgs, dir_test_lbls]
         for d in dirs:
             if not os.path.exists(path=d):
                 os.mkdir(path=d)
