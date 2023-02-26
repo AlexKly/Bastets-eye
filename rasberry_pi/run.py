@@ -1,4 +1,4 @@
-from camera import CameraWrapper
+from rasberry_pi.camera import CameraWrapper
 
 cam_wrapper = CameraWrapper()
 
