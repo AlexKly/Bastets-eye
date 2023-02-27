@@ -101,7 +101,7 @@ class YoloDatasetCreator:
         # Save image:
         cv2.imwrite(f'{self.dir_tmp}/{fname}.png', img)
         # Save annotations:
-        bbox_str = f'{bbox[0]} {bbox[1]} {bbox[2]} {bbox[3]}'
+        bbox_str = f'{0} {bbox[0]} {bbox[1]} {bbox[2]} {bbox[3]}'
         with (self.dir_tmp/f'{fname}.txt').open('w') as writer:
             writer.write(bbox_str)
 

@@ -62,3 +62,46 @@ names:
 
 For more details how to train YOLO using custom dataset you can check 
 [here](https://github.com/ultralytics/yolov5/wiki/Train-Custom-Data?ysclid=lelixivhgj19680677).
+
+## Train model
+First, clone [YOLO repository](https://github.com/ultralytics/yolov5?ysclid=len9rtrxy312236530) and prepare it for 
+using:
+```
+git clone https://github.com/ultralytics/yolov5  # clone
+cd yolov5
+pip install -r requirements.txt  # install
+```
+
+Second, prepare dataset for training model using `YoloDatasetCreator`:
+```Python
+from pathlib import Path
+
+# Specify paths:
+cur_dir = Path().resolve().parent
+dir_ds = cur_dir/'data/dog_and_cat_detection_dataset'
+dir_yolo_ds = cur_dir/'data/bastets_eye_ds'
+# Create YoloDatasetCreator object:
+ydc = YoloDatasetCreator(dir_ds=dir_ds, dir_yolo_ds=dir_yolo_ds)
+# Run create_df() to create dataset for training:
+ydc.create_df(n_transforms=5, test_size=0.2)
+```
+
+After dataset creating locate generated `bastets_eye_ds.yaml` to yolov5 directory:
+```
+cp bastets_eye_ds.yaml .../yolov5/data
+```
+
+Run train YOLO model by following command:
+```
+# Instead of yolov5n.yaml specify bastets_eye_ds.yaml
+python train.py --data coco.yaml --epochs 300 --weights '' --cfg yolov5n.yaml  --batch-size 128
+                                                                 yolov5s                    64
+                                                                 yolov5m                    40
+                                                                 yolov5l                    24
+                                                                 yolov5x                    16
+```
+
+Trained model weights you can find in following path:
+```
+.../yolov5/runs/train/exp/weights/best.pt
+```
