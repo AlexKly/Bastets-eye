@@ -1,12 +1,20 @@
+import numpy as np
 from tqdm import tqdm
 from pathlib import Path
 import xml.etree.ElementTree as ET
 from sklearn import model_selection
-import os, cv2, yaml, shutil, albumentations
+import os, cv2, yaml, shutil, typing, albumentations
 
 
 class YoloDatasetCreator:
-    def __init__(self, dir_ds, dir_yolo_ds):
+    """ YoloDatasetCreator prepares dataset from original to dataset suitable YOLO format for training YOLO model.  """
+    def __init__(self, dir_ds: Path, dir_yolo_ds: Path):
+        """ Initialization YoloDatasetCreator class object.
+
+        :param dir_ds: Path to original dataset.
+        :param dir_yolo_ds: Path to location dataset in YOLO format.
+        :return:
+        """
         # Images and annotations dataset:
         self.dir_ds = dir_ds
         self.dir_anns = dir_ds/'annotations'
@@ -35,11 +43,20 @@ class YoloDatasetCreator:
             ], bbox_params=albumentations.BboxParams(format='yolo')
         )
 
-    def load_file_paths(self):
+    def load_file_paths(self) -> list:
+        """ Load all annotations to dataset directory.
+
+        :return: List of filenames.
+        """
         return [f for f in os.listdir(self.dir_anns) if os.path.isfile(os.path.join(self.dir_anns, f))]
 
     @staticmethod
-    def read_xml(path):
+    def read_xml(path: Path):
+        """ Read xml file to extract metadata for image (bounded boxes, path to image etc).
+
+        :param path: Path to xml file.
+        :return: Parsed metadata from xml file for image file.
+        """
         tree = ET.parse(source=path)
         root = tree.getroot()
         if root[4][0].text == 'cat':
@@ -54,7 +71,16 @@ class YoloDatasetCreator:
             return None
 
     @staticmethod
-    def convert_pascal2yolo(bbox, size):
+    def convert_pascal2yolo(
+            bbox: typing.Tuple[int, int, int, int],
+            size: typing.Tuple[int, int, int]
+    ) -> typing.Tuple[float, float, float, float]:
+        """ Convert bounded box coordinates from 'pascal_voc' to 'yolo' representation format.
+
+        :param bbox: Bounded box coordinates in 'pascal_voc' format (xmin, ymin, xmax, ymax).
+        :param size: Image size (width, height).
+        :return: Bounded box coordinates in 'yolo' format (x, y, w, h).
+        """
         dw = 1. / size[0]
         dh = 1. / size[1]
         x = (bbox[0] + bbox[2]) / 2.0
@@ -64,7 +90,14 @@ class YoloDatasetCreator:
 
         return x * dw, y * dh, w * dw, h * dh
 
-    def save_files(self, fname, img, bbox):
+    def save_files(self, fname: str, img: np.ndarray, bbox: list) -> None:
+        """ Save images and bounded boxes to temporary directory.
+
+        :param fname: Filename without extension.
+        :param img: Arrays of the images.
+        :param bbox: List of the bounded boxes coordinates.
+        :return:
+        """
         # Save image:
         cv2.imwrite(f'{self.dir_tmp}/{fname}.png', img)
         # Save annotations:
@@ -72,7 +105,13 @@ class YoloDatasetCreator:
         with (self.dir_tmp/f'{fname}.txt').open('w') as writer:
             writer.write(bbox_str)
 
-    def form_yolo_ds(self, samples, test_size):
+    def form_yolo_ds(self, samples: list, test_size: float) -> None:
+        """ Create dataset directories and copy files to these directories for following training YOLO model.
+
+        :param samples: List of the filenames.
+        :param test_size: Test size ration for splitting dataset samples.
+        :return:
+        """
         # Init Yolo dataset files and directories:
         dir_imgs, dir_lbls = self.dir_yolo_ds/'images', self.dir_yolo_ds/'labels'
         dir_train_imgs, dir_train_lbls = dir_imgs/'train', dir_lbls/'train'
@@ -101,7 +140,13 @@ class YoloDatasetCreator:
         with path_ds_info.open('w') as yaml_file:
             yaml.dump(yaml_content, yaml_file, default_flow_style=False, sort_keys=False)
 
-    def create_df(self, n_transforms, test_size):
+    def create_df(self, n_transforms: int, test_size: float) -> None:
+        """ Create dataset directory for training Yolo model.
+
+        :param n_transforms: Number of the augmentation loops for each image.
+        :param test_size: Test size ration for splitting input dataset samples.
+        :return:
+        """
         names = list()
         p_anns = self.load_file_paths()
         for p in tqdm(p_anns, desc='Loading images and bounding boxes -->'):
